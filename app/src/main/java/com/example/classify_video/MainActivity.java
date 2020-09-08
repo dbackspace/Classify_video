@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.example.classify_video.Classifier.Classifier;
 import com.example.classify_video.Classifier.VideoClassifier;
 
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
         tv_result = findViewById(R.id.tv_result);
         imageView = findViewById(R.id.imgv);
         ibtn_select = findViewById(R.id.imgPreview);
