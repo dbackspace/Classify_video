@@ -168,7 +168,7 @@ public abstract class Classifier {
         Map<String, Float> labeledProbability =
                 new TensorLabel(labels, probabilityProcessor.process(outputProbabilityBuffer))
                         .getMapWithFloatValue();
-        return getTopKProbability(labeledProbability);
+        return getTopKProbability(labeledProbability,labels.size());
     }
 
     /** Closes the interpreter and model to release resources. */
@@ -205,11 +205,11 @@ public abstract class Classifier {
     }
 
     /** Gets the top-k results. */
-    private static List<Recognition> getTopKProbability(Map<String, Float> labelProb) {
+    public static List<Recognition> getTopKProbability(Map<String, Float> labelProb, int k) {
         // Find the best classifications.
         PriorityQueue<Recognition> pq =
                 new PriorityQueue<>(
-                        MAX_RESULTS,
+                        k,
                         new Comparator<Recognition>() {
                             @Override
                             public int compare(Recognition lhs, Recognition rhs) {
@@ -223,7 +223,7 @@ public abstract class Classifier {
         }
 
         final ArrayList<Recognition> recognitions = new ArrayList<>();
-        int recognitionsSize = Math.min(pq.size(), MAX_RESULTS);
+        int recognitionsSize = Math.min(pq.size(), k);
         for (int i = 0; i < recognitionsSize; ++i) {
             recognitions.add(pq.poll());
         }

@@ -4,25 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <ImageView
-            android:id="@+id/imgv"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"/>
-        <TextView
-            android:id="@+id/tv_result"
-            android:text="nhãn của ảnh"
-            android:layout_below="@+id/imgv"
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textColor="#3F51B5"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"/>
-    </RelativeLayout>
-
+    tools:context=".Activity.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,16 +13,6 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_alignParentBottom="true">
-
-        <ImageButton
-            android:id="@+id/imgPreview"
-            android:layout_width="54dp"
-            android:layout_height="46dp"
-            android:layout_gravity="center"
-            android:background="@null"
-            android:maxWidth="80dp"
-            android:maxHeight="80dp"
-            android:src="@drawable/select_image" />
 
         <ImageButton
             android:id="@+id/imgCapture"
@@ -54,15 +26,6 @@
             android:layout_gravity="center"
             android:src="@drawable/camera"/>
 
-        <ImageButton
-            android:id="@+id/imgRealtime"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:maxHeight="80dp"
-            android:maxWidth="80dp"
-            android:background="@null"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_camera_rt"/>
     </LinearLayout>
 
 </RelativeLayout>

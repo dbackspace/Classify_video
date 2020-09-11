@@ -1,19 +1,15 @@
-package com.example.classify_video;
+package com.example.classify_video.Activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -21,11 +17,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.classify_video.Classifier.Classifier;
-import com.example.classify_video.Classifier.VideoClassifier;
+import com.example.classify_video.R;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -41,99 +37,27 @@ public class MainActivity extends AppCompatActivity {
     boolean permission = false;
     Classifier classifier;
     Bitmap rgbBitmap;
-
+    InputStream inputStream;
+    Resources resources;
+    List<Bitmap> list;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tv_result = findViewById(R.id.tv_result);
-        imageView = findViewById(R.id.imgv);
-        ibtn_select = findViewById(R.id.imgPreview);
+
         ibtn_capture = findViewById(R.id.imgCapture);
-        ibtn_select.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_PICK);
-                intent.setType("image/*");
-                startActivityForResult(intent, REQUEST_CODE_FOLDER);
-            }
-        });
+        resources = getResources();
+        inputStream = resources.openRawResource(R.raw.video);
+        list = new ArrayList<>();
         ibtn_capture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getBitmap();
-                try {
-                    classifyImage();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                Intent intent = new Intent(MainActivity.this, ClassifyVideoActivity.class);
+                startActivity(intent);
             }
         });
     }
 
-    public void getBitmap() {
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
-        rgbBitmap = bitmapDrawable.getBitmap();
-    }
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_FOLDER && resultCode == Activity.RESULT_OK && data != null) {
-            Toast.makeText(this, "Returned image from storage", Toast.LENGTH_SHORT).show();
-            Uri uri = data.getData(); // get data uri
-            try {
-                InputStream inputStream = this.getContentResolver().openInputStream(uri);
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                Log.d(TAG, "onActivityResult: "+bitmap);
-                imageView.setImageBitmap(bitmap);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    private void classifyImage() throws IOException {
-        if(classifier == null){
-            recreateClassifier();
-        }
-
-        new Runnable() {
-
-            @Override
-            public void run() {
-                if (classifier != null) {
-                    final List<Classifier.Recognition> results = classifier.recognizeImage(rgbBitmap,0);
-                    Log.d(TAG, "run: " + results);
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Classifier.Recognition recognition = results.get(0);
-                            String result = "";
-                            float prob = 0f;
-                            if (recognition != null) {
-                                result = recognition.getTitle();
-                                prob = recognition.getConfidence();
-                                if (prob > 0.7) tv_result.setText(result);
-                                else tv_result.setText("Cannot classify");
-                            } else tv_result.setText("Cannot classify");
-                        }
-                    });
-                }
-            }
-        }.run();
-    }
-
-    private void recreateClassifier() {
-        if (classifier != null) {
-            classifier.close();
-            classifier = null;
-        }
-        try {
-            classifier = Classifier.create(this);
-        } catch (IOException e) {
-            Log.e("RecreateClassifier Fail", "Failed to create classifier: " + e);
-        }
-    }
     @Override
     protected void onStart() {
         super.onStart();
