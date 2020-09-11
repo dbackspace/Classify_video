@@ -33,8 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSION_RESULT = 0;
     private static final int REQUEST_CODE_FOLDER = 111;
     private static final String TAG = "MainActivity";
-//    private Classifier.Device device = Classifier.Device.CPU;
-//    private Classifier.Model model = Classifier.Model.FLOAT;
+
     private int numThreads = 3;
     TextView tv_result;
     ImageView imageView;

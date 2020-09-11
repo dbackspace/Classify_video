@@ -1,44 +1,37 @@
 package com.example.classify_video;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 
-import org.bytedeco.javacv.AndroidFrameConverter;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import wseemann.media.FFmpegMediaMetadataRetriever;
+
 public class FrameExtraction {
-    InputStream inp;
-    FFmpegFrameGrabber grabber;
-    int length;
-    public FrameExtraction(InputStream inp, int length){
-        this.inp = inp;
-        this.length = length;
-        grabber = new FFmpegFrameGrabber(inp);
+
+    FFmpegMediaMetadataRetriever ff = new FFmpegMediaMetadataRetriever();
+
+    public FrameExtraction(String path){
+        ff.setDataSource(path);
+
+    }
+
+    public FrameExtraction(Uri uri, Context context){
+        ff.setDataSource(context,uri);
     }
 
     public List<Bitmap> getListFrame(){
         ArrayList<Bitmap> list = new ArrayList<>();
-        try {
-            grabber.start();
-            AndroidFrameConverter converter = new AndroidFrameConverter();
-            int n = grabber.getLengthInFrames();
-            int p = n  / length;
-            int r = ( n /2)  % p;
-            for (int i = 0; i<n;i++){
-                Frame frame = grabber.grabImage();
-                if (i % p == r) {
-                    Bitmap bitmap = converter.convert(frame);
-                    list.add(bitmap);
-                }
-            }
-            if (list.size() > length) list.remove(list.size()-1);
-        } catch (FrameGrabber.Exception e) {
-            e.printStackTrace();
+        int length = ff.getMetadata().getInt(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION);
+        Bitmap  bitmap;
+        length = length / 1000;
+        for ( int i =0 ;i <= length; i++){
+            bitmap = ff.getFrameAtTime(i * 1000000,FFmpegMediaMetadataRetriever.OPTION_CLOSEST);
+            list.add(bitmap);
         }
         return list;
     }
