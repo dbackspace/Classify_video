@@ -1,11 +1,15 @@
 package com.example.classify_video.ExtractVideo;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 
 
+import com.example.classify_video.Util.MapUtil;
+
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +25,9 @@ public class FrameExtraction {
 
     }
 
-    public FrameExtraction(Uri uri, Context context) {
-        ff.setDataSource(context, uri);
+    public FrameExtraction(Uri uri, Activity context) {
+        File file = new File(MapUtil.getRealPathFromURI(context,uri));
+        ff.setDataSource(file.getAbsolutePath());
     }
 
     public List<Bitmap> getListFrame() {

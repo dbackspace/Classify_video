@@ -196,7 +196,7 @@ public abstract class Classifier {
         inputImageBuffer.load(bitmap);
         // Creates processor for the TensorImage.
         int cropSize = Math.min(bitmap.getWidth(), bitmap.getHeight());
-        Log.d("MainActivity", "loadImage: cropsize = "+cropSize);
+//        Log.d("MainActivity", "loadImage: cropsize = "+cropSize);
         ImageProcessor imageProcessor = new ImageProcessor.Builder()
 //                .add(new ResizeWithCropOrPadOp(cropSize,cropSize))
                 .add(new ResizeOp(imageSizeX,imageSizeY, ResizeOp.ResizeMethod.NEAREST_NEIGHBOR))

@@ -6,15 +6,18 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -115,20 +118,13 @@ public class ClassifyVideoActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ExtractVideo();
                 tv_label.setText("");
-                Classify(listBitmap.get(0));
-//                for (int i = 0; i < listBitmap.size(); i++) {
-//                    Bitmap bm = listBitmap.get(i);
-//                    if (bm == null) Log.d("Extraction", "check bitmap null: " + i);
-//                }
                 for (Bitmap bitmap : listBitmap) {
                         Classify(bitmap);
                 }
                 //sắp xếp các giá trị dự đoán
                 map = MapUtil.sortByValue(map);
-//                Log.d(TAG, "result: " + map.toString());
-
                 map = MapUtil.div_Map(map, listBitmap.size());
-//                Log.d(TAG, "new result: " + map.toString());
+                Log.d(TAG, "final_result: "+map.toString());
                 //
                 List<Classifier.Recognition> recognitionList = Classifier.getTopKProbability(map, 3);
                 String final_result = "";
@@ -164,7 +160,6 @@ public class ClassifyVideoActivity extends AppCompatActivity {
                             //tăng % của các class sau mỗi frame
                             for (Classifier.Recognition rec : results) {
                                 classes = rec.getTitle();
-                                Log.d(TAG, "check map null: " + (map == null));
                                 prob = map.get(classes);
                                 map.replace(classes, prob, prob + rec.getConfidence() * 100);
                             }
@@ -188,9 +183,6 @@ public class ClassifyVideoActivity extends AppCompatActivity {
     }
 
     private void ExtractVideo() {
-//        File file = new File(String.valueOf(videoPath));
-//
-//        FrameExtraction extraction = new FrameExtraction(file.getAbsolutePath());
         FrameExtraction extraction = new FrameExtraction(videoPath,this);
         listBitmap = extraction.getListFrame();
         Log.d(TAG, "list frame size: " + listBitmap.size());
