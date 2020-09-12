@@ -99,7 +99,7 @@ public class ClassifyVideoActivity extends AppCompatActivity {
             }
         });
         //mặc định chạy video trong raw khi bắt đầu app
-        path = "android.resource://" + getPackageName() + "/" + R.raw.video;
+        path = "android.resource://" + getPackageName() + "/" + R.raw.tennis;
         videoView.setVideoURI(Uri.parse(path));
         //chọn video từ điện thoại
         imgv_select.setOnClickListener(new View.OnClickListener() {
@@ -109,6 +109,8 @@ public class ClassifyVideoActivity extends AppCompatActivity {
                 intent.setAction(Intent.ACTION_PICK);
                 intent.setType("video/mp4");
                 startActivityForResult(intent, REQUEST_CODE_FOLDER);
+                tv_label.setText("");
+                imgv_show.setImageBitmap(null);
             }
         });
         //click nút ở giữa để phân loại
@@ -117,23 +119,25 @@ public class ClassifyVideoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ExtractVideo();
-                tv_label.setText("");
-                for (Bitmap bitmap : listBitmap) {
+                if(listBitmap.size()>0){
+                    for (Bitmap bitmap : listBitmap) {
                         Classify(bitmap);
+                    }
+                    //sắp xếp các giá trị dự đoán
+                    map = MapUtil.sortByValue(map);
+                    map = MapUtil.div_Map(map, listBitmap.size());
+                    Log.d(TAG, "final_result: "+map.toString());
+                    //
+                    List<Classifier.Recognition> recognitionList = Classifier.getTopKProbability(map, 3);
+                    String final_result = "";
+                    for (Classifier.Recognition recognition : recognitionList) {
+                        final_result += recognition.getTitle() + " : " + String.format("(%.1f%%) ", recognition.getConfidence()) + "\n";
+                    }
+                    tv_label.setText(final_result);
+                    listBitmap.clear();
+                    map = MapUtil.resetMap(map);
                 }
-                //sắp xếp các giá trị dự đoán
-                map = MapUtil.sortByValue(map);
-                map = MapUtil.div_Map(map, listBitmap.size());
-                Log.d(TAG, "final_result: "+map.toString());
-                //
-                List<Classifier.Recognition> recognitionList = Classifier.getTopKProbability(map, 3);
-                String final_result = "";
-                for (Classifier.Recognition recognition : recognitionList) {
-                    final_result += recognition.getTitle() + " : " + String.format("(%.1f%%) ", recognition.getConfidence()) + "\n";
-                }
-                tv_label.setText(final_result);
-                listBitmap.clear();
-                map = MapUtil.resetMap(map);
+
             }
         });
     }
@@ -183,10 +187,13 @@ public class ClassifyVideoActivity extends AppCompatActivity {
     }
 
     private void ExtractVideo() {
-        FrameExtraction extraction = new FrameExtraction(videoPath,this);
-        listBitmap = extraction.getListFrame();
-        Log.d(TAG, "list frame size: " + listBitmap.size());
-        imgv_show.setImageBitmap(listBitmap.get(0));
+        if(videoPath == null) Toast.makeText(this, "Chọn video để thực hiện phân loại", Toast.LENGTH_SHORT).show();
+        else{
+            FrameExtraction extraction = new FrameExtraction(videoPath,this);
+            listBitmap = extraction.getListFrame();
+            Log.d(TAG, "list frame size: " + listBitmap.size());
+            imgv_show.setImageBitmap(listBitmap.get(0));
+        }
     }
 
     @Override

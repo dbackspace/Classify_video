@@ -28,6 +28,7 @@ public class FrameExtraction {
     public FrameExtraction(Uri uri, Activity context) {
         File file = new File(MapUtil.getRealPathFromURI(context,uri));
         ff.setDataSource(file.getAbsolutePath());
+//        ff.setDataSource(context,uri);
     }
 
     public List<Bitmap> getListFrame() {

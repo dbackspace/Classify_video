@@ -46,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         ibtn_capture = findViewById(R.id.imgCapture);
-        resources = getResources();
-        inputStream = resources.openRawResource(R.raw.video);
         list = new ArrayList<>();
         ibtn_capture.setOnClickListener(new View.OnClickListener() {
             @Override
