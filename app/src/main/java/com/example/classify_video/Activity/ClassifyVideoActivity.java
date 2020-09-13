@@ -99,8 +99,7 @@ public class ClassifyVideoActivity extends AppCompatActivity {
             }
         });
         //mặc định chạy video trong raw khi bắt đầu app
-        path = "android.resource://" + getPackageName() + "/" + R.raw.tennis;
-        videoView.setVideoURI(Uri.parse(path));
+
         //chọn video từ điện thoại
         imgv_select.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,36 +141,23 @@ public class ClassifyVideoActivity extends AppCompatActivity {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void Classify(final Bitmap bitmap) {
         if (classifier == null) {
             recreateClassifier();
         }
+        final List<Classifier.Recognition> results = classifier.recognizeImage(bitmap, 0);
+        Log.d(TAG, "run: " + results);
+        Classifier.Recognition recognition = results.get(0);
+        String classes = "";
+        float prob = 0f;
+        //tăng % của các class sau mỗi frame
+        for (Classifier.Recognition rec : results) {
+            classes = rec.getTitle();
+            prob = map.get(classes);
+            map.replace(classes, prob, prob + rec.getConfidence() * 100);
 
-        new Runnable() {
-
-            @Override
-            public void run() {
-                if (classifier != null) {
-                    final List<Classifier.Recognition> results = classifier.recognizeImage(bitmap, 0);
-                    Log.d(TAG, "run: " + results);
-                    runOnUiThread(new Runnable() {
-                        @RequiresApi(api = Build.VERSION_CODES.N)
-                        @Override
-                        public void run() {
-                            Classifier.Recognition recognition = results.get(0);
-                            String classes = "";
-                            float prob = 0f;
-                            //tăng % của các class sau mỗi frame
-                            for (Classifier.Recognition rec : results) {
-                                classes = rec.getTitle();
-                                prob = map.get(classes);
-                                map.replace(classes, prob, prob + rec.getConfidence() * 100);
-                            }
-                        }
-                    });
-                }
-            }
-        }.run();
+        }
     }
 
     private void recreateClassifier() {
