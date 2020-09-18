@@ -12,40 +12,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <FrameLayout
-            android:layout_weight="4"
-            android:layout_marginTop="5dp"
+            android:layout_weight="5"
             android:layout_width="match_parent"
             android:layout_height="0dp">
             <VideoView
                 android:id="@+id/video_view"
-                android:layout_gravity="center_horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"/>
         </FrameLayout>
-        <ImageView
-            android:layout_marginTop="5dp"
-            android:layout_weight="4"
-            android:id="@+id/imgv_show"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"/>
         <TextView
-            android:layout_weight="1"
-            android:layout_marginTop="5dp"
-
+            android:layout_weight="4"
             android:id="@+id/tv_label"
-            android:hint="Nhan cua video"
             android:gravity="center"
             android:textSize="24sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </LinearLayout>
-    <LinearLayout
+    <RelativeLayout
         android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="100dp"
+        android:layout_marginTop="5dp"
         android:background="#000"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center_vertical">
 
         <ImageButton
             android:id="@+id/imgv_select"
@@ -53,23 +43,23 @@
             android:layout_height="60dp"
             android:maxHeight="80dp"
             android:maxWidth="80dp"
+            android:layout_marginRight="70dp"
+            android:layout_toLeftOf="@+id/imgv_classify"
+            android:layout_centerVertical="true"
             android:background="@null"
-            android:layout_gravity="center"
             android:src="@drawable/ic_camera_rt"/>
 
         <ImageButton
             android:id="@+id/imgv_classify"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
             android:maxHeight="80dp"
             android:maxWidth="80dp"
             android:background="@null"
-            android:layout_gravity="center"
+            android:layout_centerHorizontal="true"
             android:src="@drawable/camera"/>
 
 
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

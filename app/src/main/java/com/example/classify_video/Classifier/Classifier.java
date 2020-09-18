@@ -9,7 +9,7 @@ import android.util.Log;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.gpu.GpuDelegate;
+//import org.tensorflow.lite.gpu.GpuDelegate;
 import org.tensorflow.lite.support.common.FileUtil;
 import org.tensorflow.lite.support.common.TensorOperator;
 import org.tensorflow.lite.support.common.TensorProcessor;
@@ -44,7 +44,7 @@ public abstract class Classifier {
     private final int imageSizeY;
 
     /** Optional GPU delegate for accleration. */
-    private GpuDelegate gpuDelegate = null;
+//    private GpuDelegate gpuDelegate = null;
 
 
     /** An instance of the driver class to run model inference with Tensorflow Lite. */
@@ -146,7 +146,6 @@ public abstract class Classifier {
         int probabilityTensorIndex = 0;
         int[] probabilityShape =
                 tflite.getOutputTensor(probabilityTensorIndex).shape(); // {1, NUM_CLASSES}
-        Log.d("TAG", "Classifier: "+probabilityShape[0]+"-"+probabilityShape[1]);
         DataType probabilityDataType = tflite.getOutputTensor(probabilityTensorIndex).dataType();
         // Creates the input tensor.
         inputImageBuffer = new TensorImage(imageDataType);
