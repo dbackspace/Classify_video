@@ -36,7 +36,7 @@ public class MyCallable implements Callable<Map<String, Float>> {
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Map<String, Float> call() throws Exception {
-        Log.d("hoa", "run: thread:    "+threadID);
+        Log.d("hoa", "run: thread:    "+Thread.currentThread().getName());
         Map<String, Float> map = new HashMap<>();
         ArrayList<String> labels = (ArrayList<String>) ClassifyVideoActivity.labels;
         for (String str : labels) map.put(str, (float) 0);
@@ -50,14 +50,14 @@ public class MyCallable implements Callable<Map<String, Float>> {
                 numframe++;
             }
         }
-        Log.d("hoa", "num frame thread: "+threadID+"-"+numframe);
+        Log.d("hoa", "num frame task: "+threadID+"-"+numframe);
         ClassifyVideoActivity.NUM_FRAME += numframe;
         return map;
     }
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void Classify(Classifier classifier, final Bitmap bitmap, Map<String, Float> map) {
         List<Classifier.Recognition> results = classifier.recognizeImage(bitmap, 0);
-        Log.d("hoa", "thread "+threadID+" : " + results);
+        Log.d("hoa", "thread "+Thread.currentThread().getName()+"task "+threadID+" : " + results);
         String classes = "";
         float prob = 0f;
             //tăng % của các class sau mỗi frame
