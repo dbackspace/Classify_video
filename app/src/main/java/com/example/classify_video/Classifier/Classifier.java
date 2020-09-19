@@ -9,7 +9,7 @@ import android.util.Log;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.gpu.GpuDelegate;
+//import org.tensorflow.lite.gpu.GpuDelegate;
 import org.tensorflow.lite.support.common.FileUtil;
 import org.tensorflow.lite.support.common.TensorOperator;
 import org.tensorflow.lite.support.common.TensorProcessor;
@@ -44,7 +44,7 @@ public abstract class Classifier {
     private final int imageSizeY;
 
     /** Optional GPU delegate for accleration. */
-    private GpuDelegate gpuDelegate = null;
+//    private GpuDelegate gpuDelegate = null;
 
 
     /** An instance of the driver class to run model inference with Tensorflow Lite. */
