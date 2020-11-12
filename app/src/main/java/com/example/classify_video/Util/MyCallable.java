@@ -22,15 +22,15 @@ public class MyCallable implements Callable<Map<String, Float>> {
     protected FFmpegMediaMetadataRetriever ff;
     protected  int startTime;
     protected int endTime;
-    protected int threadID;
+    protected int taskID;
     int numframe;
 
-    public MyCallable(Classifier classifier, FFmpegMediaMetadataRetriever ff, int startTime, int endTime, int threadID) {
+    public MyCallable(Classifier classifier, FFmpegMediaMetadataRetriever ff, int startTime, int endTime, int taskID) {
         this.classifier = classifier;
         this.ff = ff;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.threadID = threadID;
+        this.taskID = taskID;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -50,14 +50,14 @@ public class MyCallable implements Callable<Map<String, Float>> {
                 numframe++;
             }
         }
-        Log.d("hoa", "num frame task: "+threadID+"-"+numframe);
+        Log.d("hoa", "num frame task: "+ taskID +"-"+numframe);
         ClassifyVideoActivity.NUM_FRAME += numframe;
         return map;
     }
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void Classify(Classifier classifier, final Bitmap bitmap, Map<String, Float> map) {
         List<Classifier.Recognition> results = classifier.recognizeImage(bitmap, 0);
-        Log.d("hoa", "thread "+Thread.currentThread().getName()+"task "+threadID+" : " + results);
+        Log.d("hoa", "thread "+Thread.currentThread().getName()+"task "+ taskID +" : " + results);
         String classes = "";
         float prob = 0f;
             //tăng % của các class sau mỗi frame

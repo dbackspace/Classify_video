@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -45,21 +46,21 @@ import wseemann.media.FFmpegMediaMetadataRetriever;
  * tách video ra frame
  * phân loại video
  */
-public class ClassifyVideoActivity extends AppCompatActivity {
+public class ClassifyVideoActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "Classify";
     private static final int REQUEST_PERMISSION_RESULT = 0;
     private static final int NUM_THREAD = 5;// số luồng chạy đồng thời trong threadpool
-    private static final int MAX_THREAD = 10;// số luồng tối đa đc tạo ra
-    public static  int NUM_FRAME = 0;
+    private static final int MAX_THREAD = 10;// số task tối đa đc tạo ra
+    public static int NUM_FRAME = 0;
     int REQUEST_CODE_FOLDER = 456;
-    boolean permission = false;
+    public static boolean permission = false;
     public static Uri videoUri;
     VideoView videoView;
     TextView tv_label;
-    ImageView  imgv_select, imgv_classify;
+    ImageView imgv_select, imgv_classify, imgv_rt;
+    private ProgressBar progressBar;
     int position = 0;
     MediaController mediaController;
-
     List<Bitmap> listBitmap;
     Classifier classifier;
     public static List<String> labels;
@@ -73,10 +74,12 @@ public class ClassifyVideoActivity extends AppCompatActivity {
         tv_label = findViewById(R.id.tv_label);
         imgv_select = findViewById(R.id.imgv_select);
         imgv_classify = findViewById(R.id.imgv_classify);
+        imgv_rt = findViewById(R.id.imgv_realtime);
+        progressBar = findViewById(R.id.progressBar_login);
         listBitmap = new ArrayList<>();
         map = new HashMap<>();
         try {
-            labels = FileUtil.loadLabels(this, "labels.txt");
+            labels = FileUtil.loadLabels(this, "labels_sport.txt");
             Log.d(TAG, "onCreate: " + labels.size());
             for (String str : labels) map.put(str, (float) 0);
         } catch (IOException e) {
@@ -96,56 +99,12 @@ public class ClassifyVideoActivity extends AppCompatActivity {
             }
         });
 
-        //chọn video từ điện thoại
-        imgv_select.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_PICK);
-                intent.setType("video/mp4");
-                startActivityForResult(intent, REQUEST_CODE_FOLDER);
-                tv_label.setText("");
-            }
-        });
+        //click nút bên trái để chọn video từ điện thoại
+        imgv_select.setOnClickListener(this);
         //click nút ở giữa để phân loại
-        imgv_classify.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
-            @Override
-            public void onClick(View v) {
-
-                long start = System.currentTimeMillis();
-                NUM_FRAME = 0;
-                ExtractVideo();
-
-                //sắp xếp các giá trị dự đoán
-                map = MapUtil.sortByValue(map);
-                map = MapUtil.div_Map(map, NUM_FRAME);
-                Log.d(TAG, "num frame: "+NUM_FRAME);
-                Log.d(TAG, "final_result: " + map.toString());
-                //
-                List<Classifier.Recognition> recognitionList = Classifier.getTopKProbability(map, 3);
-                String final_result = "";
-                for (Classifier.Recognition recognition : recognitionList) {
-                    final_result += recognition.getTitle() + " : " + String.format("(%.1f%%) ", recognition.getConfidence()) + "\n";
-                }
-                long end = System.currentTimeMillis();
-                long t = end - start;
-                final_result+="time: "+t/1000+"s";
-                Log.d(TAG, "check list recog: "+recognitionList.size());
-                if (recognitionList.get(0).getConfidence() >= 80.0) {
-                    tv_label.setText(final_result);
-                } else {
-                    tv_label.setText("Không phân loại được\n"+"time: "+t/1000+"s");
-                }
-
-                listBitmap.clear();
-                map = MapUtil.resetMap(map);
-
-
-            }
-
-//            }
-        });
+        imgv_classify.setOnClickListener(this);
+        // click nút bên phải để phân loại realtime
+        imgv_rt.setOnClickListener(this);
     }
 
 
@@ -177,7 +136,7 @@ public class ClassifyVideoActivity extends AppCompatActivity {
             //
             int videoLength = ff.getMetadata().getInt(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION);
             videoLength = videoLength / 1000;
-            int min_length = videoLength/MAX_THREAD;// số giây tối thiểu để phân loại
+            int min_length = videoLength / MAX_THREAD;// số giây tối thiểu để phân loại
             Log.d("hoa", "video length: " + videoLength);
             if (videoLength >= min_length) {
                 int part_length = Math.round((float) videoLength / MAX_THREAD);
@@ -185,7 +144,7 @@ public class ClassifyVideoActivity extends AppCompatActivity {
                 int start_time = 0;
                 int end_time = part_length - 1;
                 Log.d("hoa", "part_length: " + part_length);
-                MyCallable myCallable = new MyCallable(classifier,ff,start_time,end_time,1);
+                MyCallable myCallable = new MyCallable(classifier, ff, start_time, end_time, 1);
                 Future<Map<String, Float>> future = executorService.submit(myCallable);
                 listFuture.add(future);
 
@@ -203,22 +162,22 @@ public class ClassifyVideoActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                    myCallable = new MyCallable(classifier1,ff,start_time,end_time,i);
+                    myCallable = new MyCallable(classifier1, ff, start_time, end_time, i);
                     future = executorService.submit(myCallable);
                     listFuture.add(future);
                     i++;
                 }
             } else {
-                MyCallable myCallable = new MyCallable(classifier,ff,0,videoLength,1);
+                MyCallable myCallable = new MyCallable(classifier, ff, 0, videoLength, 1);
                 Future<Map<String, Float>> future = executorService.submit(myCallable);
                 listFuture.add(future);
             }
             for (Future future : listFuture) {
                 try {
-                    Log.d(TAG, "map : "+future.get());
-                    Map<String ,Float> tmp_map = (Map<String, Float>) future.get();
-                    for(String str:map.keySet()){
-                        map.put(str,map.get(str)+tmp_map.get(str));
+                    Log.d(TAG, "map : " + future.get());
+                    Map<String, Float> tmp_map = (Map<String, Float>) future.get();
+                    for (String str : map.keySet()) {
+                        map.put(str, map.get(str) + tmp_map.get(str));
                     }
                 } catch (ExecutionException e) {
                     e.printStackTrace();
@@ -294,6 +253,55 @@ public class ClassifyVideoActivity extends AppCompatActivity {
             if (grantResults[0] == grantResults[1] && grantResults[1] == grantResults[2] && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 permission = true;
             }
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.imgv_select:
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_PICK);
+                intent.setType("video/mp4");
+                startActivityForResult(intent, REQUEST_CODE_FOLDER);
+                tv_label.setText("");
+                break;
+            case R.id.imgv_realtime:
+                Intent intent1 = new Intent(ClassifyVideoActivity.this,ClassifyRealTime.class);
+                startActivity(intent1);
+                break;
+            case R.id.imgv_classify:
+                progressBar.setVisibility(View.VISIBLE);
+                long start = System.currentTimeMillis();
+                NUM_FRAME = 0;
+                ExtractVideo();
+
+                //sắp xếp các giá trị dự đoán
+                map = MapUtil.sortByValue(map);
+                map = MapUtil.div_Map(map, NUM_FRAME);
+                Log.d(TAG, "num frame: " + NUM_FRAME);
+                Log.d(TAG, "final_result: " + map.toString());
+                //
+                List<Classifier.Recognition> recognitionList = Classifier.getTopKProbability(map, 3);
+                String final_result = "";
+                for (Classifier.Recognition recognition : recognitionList) {
+                    final_result += recognition.getTitle() + " : " + String.format("(%.1f%%) ", recognition.getConfidence()) + "\n";
+                }
+                long end = System.currentTimeMillis();
+                long t = end - start;
+                final_result += "time: " + t / 1000 + "s";
+                progressBar.setVisibility(View.GONE);
+                Log.d(TAG, "check list recog: " + recognitionList.size());
+                if (recognitionList.get(0).getConfidence() >= 80.0) {
+                    tv_label.setText(final_result);
+                } else {
+                    tv_label.setText("Không phân loại được\n" + "time: " + t / 1000 + "s");
+                }
+
+                listBitmap.clear();
+                map = MapUtil.resetMap(map);
+                break;
         }
     }
 }
