@@ -26,12 +26,12 @@ public class VideoClassifier extends Classifier {
 
     @Override
     protected String getModelPath() {
-        return "model_sport.tflite";
+        return "model.tflite";
     }
 
     @Override
     protected String getLabelPath() {
-        return "labels_sport.txt";
+        return "labels.txt";
     }
 
     @Override

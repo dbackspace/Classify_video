@@ -1,19 +1,3 @@
-/*
- * Copyright 2019 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.example.classify_video.Activity;
 
 import android.Manifest;
@@ -40,11 +24,9 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
-import android.media.ImageReader.OnImageAvailableListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -68,13 +50,13 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-//import org.tensorflow.lite.examples.classification.customview.AutoFitTextureView;
-//import org.tensorflow.lite.examples.classification.env.Logger;
 
 /**
- * Camera Connection Fragment that captures images from camera.
- *
- * <p>Instantiated by newInstance.</p>
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * to handle interaction events.
+ * Use the {@link CameraConnectionFragment#newInstance} factory method to
+ * create an instance of this fragment.
  */
 @SuppressWarnings("FragmentNotInstantiable")
 public class CameraConnectionFragment extends Fragment {
@@ -100,8 +82,8 @@ public class CameraConnectionFragment extends Fragment {
 
     /** A {@link Semaphore} to prevent the app from exiting before closing the camera. */
     private final Semaphore cameraOpenCloseLock = new Semaphore(1);
-    /** A {@link OnImageAvailableListener} to receive frames as they are available. */
-    private final OnImageAvailableListener imageListener;
+    /** A {@link ImageReader.OnImageAvailableListener} to receive frames as they are available. */
+    private final ImageReader.OnImageAvailableListener imageListener;
     /** The input size in pixels desired by TensorFlow (width and height of a square bitmap). */
     private final Size inputSize;
     /** The layout identifier to inflate for this Fragment. */
@@ -206,7 +188,7 @@ public class CameraConnectionFragment extends Fragment {
     @SuppressLint("ValidFragment")
     private CameraConnectionFragment(
             final ConnectionCallback connectionCallback,
-            final OnImageAvailableListener imageListener,
+            final ImageReader.OnImageAvailableListener imageListener,
             final int layout,
             final Size inputSize) {
         this.cameraConnectionCallback = connectionCallback;
@@ -244,7 +226,7 @@ public class CameraConnectionFragment extends Fragment {
                 tooSmall.add(option);
             }
         }
-//
+
 //        LOGGER.i("Desired size: " + desiredSize + ", min size: " + minSize + "x" + minSize);
 //        LOGGER.i("Valid preview sizes: [" + TextUtils.join(", ", bigEnough) + "]");
 //        LOGGER.i("Rejected preview sizes: [" + TextUtils.join(", ", tooSmall) + "]");
@@ -267,7 +249,7 @@ public class CameraConnectionFragment extends Fragment {
 
     public static CameraConnectionFragment newInstance(
             final ConnectionCallback callback,
-            final OnImageAvailableListener imageListener,
+            final ImageReader.OnImageAvailableListener imageListener,
             final int layout,
             final Size inputSize) {
         return new CameraConnectionFragment(callback, imageListener, layout, inputSize);
@@ -300,7 +282,7 @@ public class CameraConnectionFragment extends Fragment {
     @Override
     public void onViewCreated(final View view, final Bundle savedInstanceState) {
         textureView = (AutoFitTextureView) view.findViewById(R.id.texture);
-        if(textureView == null) Log.d("CameraConnection", "onViewCreated:  texture null");
+        if (textureView != null) Log.d("CameraConnection", "onViewCreated:  texture not null");
     }
 
     @Override
@@ -317,13 +299,17 @@ public class CameraConnectionFragment extends Fragment {
         // available, and "onSurfaceTextureAvailable" will not be called. In that case, we can open
         // a camera and start preview from here (otherwise, we wait until the surface is ready in
         // the SurfaceTextureListener).
-        if(textureView == null)
-        Log.d("CameraConnection", "check textureView null: ");
-        if (textureView.isAvailable()) {
-            openCamera(textureView.getWidth(), textureView.getHeight());
-        } else {
-            textureView.setSurfaceTextureListener(surfaceTextureListener);
+//        textureView = null;
+        try {
+            if (textureView.isAvailable()) {
+                openCamera(textureView.getWidth(), textureView.getHeight());
+            } else {
+                textureView.setSurfaceTextureListener(surfaceTextureListener);
+            }
+        }catch (Exception e){
+
         }
+
     }
 
     @Override
@@ -388,7 +374,7 @@ public class CameraConnectionFragment extends Fragment {
             if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
-            if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
@@ -437,14 +423,16 @@ public class CameraConnectionFragment extends Fragment {
     }
 
     /** Stops the background thread and its {@link Handler}. */
-    private void stopBackgroundThread() {
-        backgroundThread.quitSafely();
-        try {
-            backgroundThread.join();
-            backgroundThread = null;
-            backgroundHandler = null;
-        } catch (final InterruptedException e) {
+    protected void stopBackgroundThread() {
+        if(backgroundThread != null){
+            backgroundThread.quitSafely();
+            try {
+                backgroundThread.join();
+                backgroundThread = null;
+                backgroundHandler = null;
+            } catch (final InterruptedException e) {
 //            LOGGER.e(e, "Exception!");
+            }
         }
     }
 

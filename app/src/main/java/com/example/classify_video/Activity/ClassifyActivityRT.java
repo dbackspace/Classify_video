@@ -1,43 +1,23 @@
-/*
- * Copyright 2019 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.example.classify_video.Activity;
 
+
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.Typeface;
-import android.media.ImageReader.OnImageAvailableListener;
+import android.media.ImageReader;
 import android.os.SystemClock;
-import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
-import android.widget.Toast;
 
 import com.example.classify_video.Classifier.Classifier;
+import com.example.classify_video.Classifier.*;
 import com.example.classify_video.R;
 
 import java.io.IOException;
 import java.util.List;
 
-
-public class ClassifyRealTime extends CameraActivity implements OnImageAvailableListener {
+public class ClassifyActivityRT extends CameraActivity implements ImageReader.OnImageAvailableListener {
 //    private static final Logger LOGGER = new Logger();
     private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
     private static final float TEXT_SIZE_DIP = 10;
-    private static final String TAG = "ClassifyRealtime";
     private Bitmap rgbFrameBitmap = null;
     private long lastProcessingTimeMs;
     private Integer sensorOrientation;
@@ -50,7 +30,7 @@ public class ClassifyRealTime extends CameraActivity implements OnImageAvailable
 
     @Override
     protected int getLayoutId() {
-        return R.layout.activity_classify_real_time;
+        return R.layout.fragment_camera_connection;
     }
 
     @Override
@@ -63,9 +43,12 @@ public class ClassifyRealTime extends CameraActivity implements OnImageAvailable
         final float textSizePx =
                 TypedValue.applyDimension(
                         TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, getResources().getDisplayMetrics());
+//        borderedText = new BorderedText(textSizePx);
+//        borderedText.setTypeface(Typeface.MONOSPACE);
 
-        recreateClassifier();
+        recreateClassifier(getModel(), getDevice(), getNumThreads());
         if (classifier == null) {
+//            LOGGER.e("No classifier on preview!");
             return;
         }
 
@@ -73,7 +56,10 @@ public class ClassifyRealTime extends CameraActivity implements OnImageAvailable
         previewHeight = size.getHeight();
 
         sensorOrientation = rotation - getScreenOrientation();
-        rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Config.ARGB_8888);
+//        LOGGER.i("Camera orientation relative to screen canvas: %d", sensorOrientation);
+
+//        LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight);
+        rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888);
     }
 
     @Override
@@ -111,34 +97,42 @@ public class ClassifyRealTime extends CameraActivity implements OnImageAvailable
     }
 
     @Override
-    protected void onInferenceConfigurationChanged() {
-        if (rgbFrameBitmap == null) {
-            return;
-        }
-        runInBackground(new Runnable() {
-            @Override
-            public void run() {
-                recreateClassifier();
-            }
-        });
-}
-    @Override
     public void onBackPressed() {
         postInferenceCallback = null;
         imageConverter = null;
         stopBackgroundThread();
         super.onBackPressed();
     }
-    private void recreateClassifier() {
+
+    @Override
+    protected void onInferenceConfigurationChanged() {
+        if (rgbFrameBitmap == null) {
+            // Defer creation until we're getting camera frames.
+            return;
+        }
+        final Classifier.Device device = getDevice();
+        final Classifier.Model model = getModel();
+        final int numThreads = getNumThreads();
+        runInBackground(new Runnable() {
+            @Override
+            public void run() {
+                recreateClassifier(model, device, numThreads);
+            }
+        });
+    }
+
+    private void recreateClassifier(Classifier.Model model, Classifier.Device device, int numThreads) {
         if (classifier != null) {
+//            LOGGER.d("Closing classifier.");
             classifier.close();
             classifier = null;
         }
-
         try {
+//            LOGGER.d(
+//                    "Creating classifier (model=%s, device=%s, numThreads=%d)", model, device, numThreads);
             classifier = Classifier.create(this);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to create classifier." );
+//            LOGGER.e(e, "Failed to create classifier.");
         }
 
         // Updates the input image size.

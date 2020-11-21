@@ -1,5 +1,3 @@
-package com.example.classify_video.Util;
-
 /* Copyright 2019 The TensorFlow Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
+package com.example.classify_video.Util;
 
 import android.graphics.Bitmap;
 import android.os.Environment;
@@ -27,9 +26,9 @@ public class ImageUtils {
     // are normalized to eight bits.
     static final int kMaxChannelValue = 262143;
 
-    @SuppressWarnings("unused")
+//    @SuppressWarnings("unused")
 //    private static final Logger LOGGER = new Logger();
-
+///
     /**
      * Utility method to compute the allocated size in bytes of a YUV420SP image of the given
      * dimensions.

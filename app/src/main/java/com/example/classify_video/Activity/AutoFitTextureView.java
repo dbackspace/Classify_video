@@ -4,9 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.TextureView;
 
-/**
- * A {@link TextureView} that can be adjusted to a specified aspect ratio.
- */
 public class AutoFitTextureView extends TextureView {
     private int ratioWidth = 0;
     private int ratioHeight = 0;
@@ -15,12 +12,12 @@ public class AutoFitTextureView extends TextureView {
         this(context, null);
     }
 
-    public AutoFitTextureView(Context context, AttributeSet attrs) {
-        super(context, attrs, 0);
+    public AutoFitTextureView(final Context context, final AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
-    public AutoFitTextureView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+    public AutoFitTextureView(final Context context, final AttributeSet attrs, final int defStyle) {
+        super(context, attrs, defStyle);
     }
 
     /**
@@ -28,25 +25,24 @@ public class AutoFitTextureView extends TextureView {
      * calculated from the parameters. Note that the actual sizes of parameters don't matter, that is,
      * calling setAspectRatio(2, 3) and setAspectRatio(4, 6) make the same result.
      *
-     * @param width  Relative horizontal size
+     * @param width Relative horizontal size
      * @param height Relative vertical size
      */
-
-    public void setAspectRatio(int width, int height) {
+    public void setAspectRatio(final int width, final int height) {
         if (width < 0 || height < 0) {
-            throw new IllegalArgumentException("Size cannot be negative");
+            throw new IllegalArgumentException("Size cannot be negative.");
         }
-        ratioHeight = height;
         ratioWidth = width;
+        ratioHeight = height;
         requestLayout();
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        if (ratioWidth == 0 || ratioHeight == 0) {
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int height = MeasureSpec.getSize(heightMeasureSpec);
+        if (0 == ratioWidth || 0 == ratioHeight) {
             setMeasuredDimension(width, height);
         } else {
             if (width < height * ratioWidth / ratioHeight) {

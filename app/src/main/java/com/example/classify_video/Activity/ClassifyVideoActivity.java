@@ -79,7 +79,7 @@ public class ClassifyVideoActivity extends AppCompatActivity implements View.OnC
         listBitmap = new ArrayList<>();
         map = new HashMap<>();
         try {
-            labels = FileUtil.loadLabels(this, "labels_sport.txt");
+            labels = FileUtil.loadLabels(this, "labels.txt");
             Log.d(TAG, "onCreate: " + labels.size());
             for (String str : labels) map.put(str, (float) 0);
         } catch (IOException e) {
@@ -268,7 +268,7 @@ public class ClassifyVideoActivity extends AppCompatActivity implements View.OnC
                 tv_label.setText("");
                 break;
             case R.id.imgv_realtime:
-                Intent intent1 = new Intent(ClassifyVideoActivity.this,ClassifyRealTime.class);
+                Intent intent1 = new Intent(ClassifyVideoActivity.this,ClassifyActivityRT.class);
                 startActivity(intent1);
                 break;
             case R.id.imgv_classify:
@@ -293,7 +293,7 @@ public class ClassifyVideoActivity extends AppCompatActivity implements View.OnC
                 final_result += "time: " + t / 1000 + "s";
                 progressBar.setVisibility(View.GONE);
                 Log.d(TAG, "check list recog: " + recognitionList.size());
-                if (recognitionList.get(0).getConfidence() >= 80.0) {
+                if (recognitionList.get(0).getConfidence() >= 70.0) {
                     tv_label.setText(final_result);
                 } else {
                     tv_label.setText("Không phân loại được\n" + "time: " + t / 1000 + "s");

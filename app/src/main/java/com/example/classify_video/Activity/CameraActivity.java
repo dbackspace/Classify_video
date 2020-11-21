@@ -1,26 +1,7 @@
-/*
- * Copyright 2019 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.example.classify_video.Activity;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import androidx.fragment.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
@@ -28,27 +9,18 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
-import android.media.Image.Plane;
 import android.media.ImageReader;
-import android.media.ImageReader.OnImageAvailableListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Trace;
-import androidx.annotation.NonNull;
-import androidx.annotation.UiThread;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.ButtonBarLayout;
-
-import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -56,27 +28,29 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.classify_video.Activity.CameraConnectionFragment;
-import com.example.classify_video.Activity.LegacyCameraConnectionFragment;
-import com.example.classify_video.Classifier.Classifier;
+import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+
+import com.example.classify_video.Classifier.*;
 import com.example.classify_video.R;
 import com.example.classify_video.Util.ImageUtils;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+
 import java.nio.ByteBuffer;
 import java.util.List;
 
-
-public abstract class CameraActivity extends AppCompatActivity
-        implements OnImageAvailableListener,
+public abstract class CameraActivity extends AppCompatActivity implements ImageReader.OnImageAvailableListener,
         Camera.PreviewCallback,
         View.OnClickListener,
-        AdapterView.OnItemSelectedListener {
+        AdapterView.OnItemSelectedListener  {
+
 //    private static final Logger LOGGER = new Logger();
 
     private static final int PERMISSIONS_REQUEST = 1;
 
     private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
-    private static final String TAG = "CameraActivity";
     protected int previewWidth = 0;
     protected int previewHeight = 0;
     private Handler handler;
@@ -103,14 +77,15 @@ public abstract class CameraActivity extends AppCompatActivity
             rotationTextView,
             inferenceTimeTextView;
     protected ImageView bottomSheetArrowImageView;
+    protected ImageButton btnBack;
     private ImageView plusImageView, minusImageView;
     private Spinner modelSpinner;
     private Spinner deviceSpinner;
     private TextView threadsTextView;
-    private ImageButton btnBack;
+
     private Classifier.Model model = Classifier.Model.FLOAT;
     private Classifier.Device device = Classifier.Device.CPU;
-    private int numThreads = -1;
+    private int numThreads = 1;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -118,17 +93,19 @@ public abstract class CameraActivity extends AppCompatActivity
         super.onCreate(null);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.activity_classify_real_time);
-        btnBack  = findViewById(R.id.btnBack);
+        setContentView(R.layout.activity_classify_rt);
+
+        btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 stopBackgroundThread();
                 CameraActivity.this.finish();
-                Intent intent = new Intent(CameraActivity.this, ClassifyVideoActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(CameraActivity.this, MainActivity.class);
+//                startActivity(intent);
             }
         });
+
         if (hasPermission()) {
             setFragment();
         } else {
@@ -143,7 +120,6 @@ public abstract class CameraActivity extends AppCompatActivity
         bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
         gestureLayout = findViewById(R.id.gesture_layout);
         sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
-//        bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
 
         ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(
@@ -211,9 +187,9 @@ public abstract class CameraActivity extends AppCompatActivity
         plusImageView.setOnClickListener(this);
         minusImageView.setOnClickListener(this);
 
-//        model = Model.valueOf(modelSpinner.getSelectedItem().toString().toUpperCase());
-//        device = Device.valueOf(deviceSpinner.getSelectedItem().toString());
-//        numThreads = Integer.parseInt(threadsTextView.getText().toString().trim());
+        model = Classifier.Model.FLOAT;
+        device = Classifier.Device.CPU;
+        numThreads = 1;
     }
 
     protected int[] getRgbBytes() {
@@ -297,7 +273,7 @@ public abstract class CameraActivity extends AppCompatActivity
             }
             isProcessingFrame = true;
             Trace.beginSection("imageAvailable");
-            final Plane[] planes = image.getPlanes();
+            final Image.Plane[] planes = image.getPlanes();
             fillBytes(planes, yuvBytes);
             yRowStride = planes[0].getRowStride();
             final int uvRowStride = planes[1].getRowStride();
@@ -339,6 +315,13 @@ public abstract class CameraActivity extends AppCompatActivity
     }
 
     @Override
+    public void onBackPressed() {
+        stopBackgroundThread();
+
+        super.onBackPressed();
+    }
+
+    @Override
     public synchronized void onStart() {
 //        LOGGER.d("onStart " + this);
         super.onStart();
@@ -357,17 +340,21 @@ public abstract class CameraActivity extends AppCompatActivity
     @Override
     public synchronized void onPause() {
 //        LOGGER.d("onPause " + this);
-
-        handlerThread.quitSafely();
-        try {
-            handlerThread.join();
-            handlerThread = null;
-            handler = null;
-        } catch (final InterruptedException e) {
-//            LOGGER.e(e, "Exception!");
-        }
-
+        stopBackgroundThread();
         super.onPause();
+    }
+
+    protected void stopBackgroundThread(){
+        if(handlerThread != null){
+            handlerThread.quitSafely();
+            try {
+                handlerThread.join();
+                handlerThread = null;
+                handler = null;
+            } catch (final InterruptedException e) {
+//            LOGGER.e(e, "Exception!");
+            }
+        }
     }
 
     @Override
@@ -387,22 +374,10 @@ public abstract class CameraActivity extends AppCompatActivity
             handler.post(r);
         }
     }
-    protected void stopBackgroundThread(){
-        if(handlerThread != null){
-            handlerThread.quitSafely();
-            try {
-                handlerThread.join();
-                handlerThread = null;
-                handler = null;
-            } catch (final InterruptedException e) {
-    //            LOGGER.e(e, "Exception!");
-            }
-        }
-    }
+
     @Override
     public void onRequestPermissionsResult(
             final int requestCode, final String[] permissions, final int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSIONS_REQUEST) {
             if (allPermissionsGranted(grantResults)) {
                 setFragment();
@@ -494,7 +469,6 @@ public abstract class CameraActivity extends AppCompatActivity
 
         Fragment fragment;
         if (useCamera2API) {
-
             CameraConnectionFragment camera2Fragment =
                     CameraConnectionFragment.newInstance(
                             new CameraConnectionFragment.ConnectionCallback() {
@@ -512,14 +486,13 @@ public abstract class CameraActivity extends AppCompatActivity
             camera2Fragment.setCamera(cameraId);
             fragment = camera2Fragment;
         } else {
-            fragment =
-                    new LegacyCameraConnectionFragment(this, getLayoutId(), getDesiredPreviewFrameSize());
+            fragment = new LegacyCameraConnectionFragment(this, getLayoutId(), getDesiredPreviewFrameSize());
         }
 
-        this.getSupportFragmentManager().beginTransaction().replace(R.id.container,fragment).commit();
+        this.getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
     }
 
-    protected void fillBytes(final Plane[] planes, final byte[][] yuvBytes) {
+    protected void fillBytes(final Image.Plane[] planes, final byte[][] yuvBytes) {
         // Because of the variable row stride it's not possible to know in
         // advance the actual necessary dimensions of the yuv planes.
         for (int i = 0; i < planes.length; ++i) {
@@ -639,12 +612,7 @@ public abstract class CameraActivity extends AppCompatActivity
             onInferenceConfigurationChanged();
         }
     }
-    @Override
-    public void onBackPressed() {
-        stopBackgroundThread();
 
-        super.onBackPressed();
-    }
     protected abstract void processImage();
 
     protected abstract void onPreviewSizeChosen(final Size size, final int rotation);
@@ -674,13 +642,12 @@ public abstract class CameraActivity extends AppCompatActivity
         }
     }
 
-
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         if (parent == modelSpinner) {
-//            setModel(Model.valueOf(parent.getItemAtPosition(pos).toString().toUpperCase()));
+            setModel(Classifier.Model.valueOf(parent.getItemAtPosition(pos).toString().toUpperCase()));
         } else if (parent == deviceSpinner) {
-//            setDevice(Device.valueOf(parent.getItemAtPosition(pos).toString()));
+            setDevice(Classifier.Device.valueOf(parent.getItemAtPosition(pos).toString()));
         }
     }
 
@@ -688,4 +655,6 @@ public abstract class CameraActivity extends AppCompatActivity
     public void onNothingSelected(AdapterView<?> parent) {
         // Do nothing.
     }
+
+
 }

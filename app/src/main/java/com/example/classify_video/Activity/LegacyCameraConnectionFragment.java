@@ -1,7 +1,7 @@
 package com.example.classify_video.Activity;
 
+
 import android.annotation.SuppressLint;
-import androidx.fragment.app.Fragment;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -15,17 +15,22 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.fragment.app.Fragment;
 
 import com.example.classify_video.R;
 import com.example.classify_video.Util.ImageUtils;
 
 import java.io.IOException;
-import java.net.PasswordAuthentication;
 import java.util.List;
 
-@SuppressLint("ValidFragment")
+/**
+ * A simple {@link Fragment} subclass.
+ */
 public class LegacyCameraConnectionFragment extends Fragment {
+//    private static final Logger LOGGER = new Logger();
+    /** Conversion from screen rotation to JPEG orientation. */
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
+
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
         ORIENTATIONS.append(Surface.ROTATION_90, 0);
@@ -163,6 +168,7 @@ public class LegacyCameraConnectionFragment extends Fragment {
             backgroundThread.join();
             backgroundThread = null;
         } catch (final InterruptedException e) {
+//            LOGGER.e(e, "Exception!");
         }
     }
 

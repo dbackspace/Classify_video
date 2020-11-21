@@ -1,7 +1,0 @@
-bia
-bowling
-football
-golf
-table_tennis
-tennis
-volleyball
