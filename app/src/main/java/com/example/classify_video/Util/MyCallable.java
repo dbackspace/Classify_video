@@ -46,7 +46,7 @@ public class MyCallable implements Callable<Map<String, Float>> {
         for (int i = startTime; i <= endTime; i+=2) {
             bitmap = ff.getFrameAtTime(i * 1000000, FFmpegMediaMetadataRetriever.OPTION_CLOSEST);
             if (bitmap != null) {
-                Classify(classifier, bitmap, map);
+                MapUtil.Classify(classifier, bitmap, map);
                 numframe++;
             }
         }
@@ -54,18 +54,18 @@ public class MyCallable implements Callable<Map<String, Float>> {
         ClassifyVideoActivity.NUM_FRAME += numframe;
         return map;
     }
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    private void Classify(Classifier classifier, final Bitmap bitmap, Map<String, Float> map) {
-        List<Classifier.Recognition> results = classifier.recognizeImage(bitmap, 0);
-        Log.d("hoa", "thread "+Thread.currentThread().getName()+"task "+ taskID +" : " + results);
-        String classes = "";
-        float prob = 0f;
-            //tăng % của các class sau mỗi frame
-        for (Classifier.Recognition rec : results) {
-            classes = rec.getTitle();
-            prob = map.get(classes);
-            map.replace(classes, prob, prob + rec.getConfidence() * 100);
-        }
-
-    }
+//    @RequiresApi(api = Build.VERSION_CODES.N)
+//    private void Classify(Classifier classifier, final Bitmap bitmap, Map<String, Float> map) {
+//        List<Classifier.Recognition> results = classifier.recognizeImage(bitmap, 0);
+//        Log.d("hoa", "thread "+Thread.currentThread().getName()+"task "+ taskID +" : " + results);
+//        String classes = "";
+//        float prob = 0f;
+//            //tăng % của các class sau mỗi frame
+//        for (Classifier.Recognition rec : results) {
+//            classes = rec.getTitle();
+//            prob = map.get(classes);
+//            map.replace(classes, prob, prob + rec.getConfidence() * 100);
+//        }
+//
+//    }
 }

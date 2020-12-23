@@ -1,5 +1,5 @@
-Soccer
-Table Tennis
-Tennis
-Volleyball
-Bia
+bia
+football
+table_tennis
+tennis
+volleyball

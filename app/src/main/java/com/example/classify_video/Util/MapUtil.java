@@ -2,11 +2,15 @@ package com.example.classify_video.Util;
 
 import android.app.Activity;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
+
+import com.example.classify_video.Classifier.Classifier;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -48,5 +52,19 @@ public class MapUtil {
             cursor.close();
         }
         return result;
+    }
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public static void Classify(Classifier classifier, final Bitmap bitmap, Map<String, Float> map) {
+        List<Classifier.Recognition> results = classifier.recognizeImage(bitmap, 0);
+//        Log.d("hoa", "thread "+Thread.currentThread().getName()+"task "+ taskID +" : " + results);
+        String classes = "";
+        float prob = 0f;
+        //tăng % của các class sau mỗi frame
+        for (Classifier.Recognition rec : results) {
+            classes = rec.getTitle();
+            prob = map.get(classes);
+            map.replace(classes, prob, prob + rec.getConfidence() * 100);
+        }
+
     }
 }

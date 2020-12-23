@@ -5,80 +5,102 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Activity.ClassifyVideoActivity">
+
     <LinearLayout
-        android:weightSum="9"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <FrameLayout
-            android:layout_weight="4"
+        android:layout_margin="5dp"
+        android:weightSum="8">
+
+        <VideoView
+            android:id="@+id/video_view"
             android:layout_width="match_parent"
-            android:layout_height="0dp">
-            <VideoView
-                android:id="@+id/video_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-        </FrameLayout>
+            android:layout_height="0dp"
+            android:layout_weight="4" />
+        <!--        </FrameLayout>-->
         <TextView
-            android:layout_weight="4"
             android:id="@+id/tv_label"
-            android:gravity="center"
-            android:textSize="24sp"
             android:layout_width="match_parent"
-            android:layout_height="0dp"/>
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:gravity="center"
+            android:textSize="16sp" />
+
+
         <ProgressBar
-            android:layout_weight="1"
-            android:id="@+id/progressBar_login"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center|bottom"
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
             android:layout_marginBottom="100dp"
-            android:visibility="gone"/>
+            android:layout_weight="1"
+            android:visibility="gone" />
     </LinearLayout>
-    <RelativeLayout
+
+    <LinearLayout
+        android:id="@+id/bottom"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_marginTop="5dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:background="#000"
         android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:gravity="center_vertical">
+        android:padding="10dp"
+        android:weightSum="3">
 
-        <ImageButton
-            android:id="@+id/imgv_select"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:maxHeight="80dp"
-            android:maxWidth="80dp"
-            android:layout_marginRight="70dp"
-            android:layout_toLeftOf="@+id/imgv_classify"
-            android:layout_centerVertical="true"
-            android:background="@null"
-            android:src="@drawable/select_image"/>
+        <LinearLayout
+            android:id="@+id/btn_storage"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center">
 
-        <ImageButton
-            android:id="@+id/imgv_classify"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:maxHeight="80dp"
-            android:maxWidth="80dp"
-            android:background="@null"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/camera"/>
-        <ImageButton
-            android:id="@+id/imgv_realtime"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:maxHeight="80dp"
-            android:maxWidth="80dp"
-            android:layout_marginLeft="70dp"
-            android:layout_toRightOf="@+id/imgv_classify"
-            android:layout_centerVertical="true"
-            android:background="@null"
-            android:src="@drawable/ic_camera_rt"/>
+            <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/imgv_selectVideo"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="left"
+                android:src="@drawable/select_image"
+                app:civ_border_color="#FF000000"
+                app:civ_border_width="0dp" />
 
+        </LinearLayout>
 
-    </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/btn_capture"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/imgv_classify"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="bottom|center"
+                android:src="@drawable/circle"
+                app:civ_border_color="#838080"
+                app:civ_border_width="5dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btn_listVideo"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/imgv_listClassify"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/list_classify"
+                app:civ_border_color="#FF000000"
+                app:civ_border_width="1dp" />
+
+        </LinearLayout>
+    </LinearLayout>
+
 
 </RelativeLayout>
