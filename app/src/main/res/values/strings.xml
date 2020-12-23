@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Classify_video</string>
+    <string name="tfe_ic_camera_error">this device does not support Camera2 API</string>
+    <string name="string_action_favorite">string/action_favorite</string>
 </resources>

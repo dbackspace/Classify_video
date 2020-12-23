@@ -30,7 +30,14 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 public abstract class Classifier {
+    public enum Model {
+        FLOAT
+    }
 
+    /** The runtime device type used for executing classification. */
+    public enum Device {
+        CPU
+    }
     /** Number of results to show in the UI. */
     private static final int MAX_RESULTS = 3;
 
